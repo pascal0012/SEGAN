@@ -26,12 +26,12 @@ def slice_signal(file, window_size, stride, sample_rate):
     Helper function for slicing the audio file
     by window size and sample rate with [1-stride] percent overlap (default 50%).
     """
-    wav, sr = librosa.load(file, sr=sample_rate)
+    #wav, sr = librosa.load(file, sr=sample_rate)
     hop = int(window_size * stride)
     slices = []
-    for end_idx in range(window_size, len(wav), hop):
+    for end_idx in range(window_size, len(file), hop):
         start_idx = end_idx - window_size
-        slice_sig = wav[start_idx:end_idx]
+        slice_sig = file[start_idx:end_idx]
         slices.append(slice_sig)
     return slices
 
@@ -63,13 +63,16 @@ def process_and_serialize(data_type):
             clean_file = os.path.join(clean_folder, filename)
             noisy_file = os.path.join(noisy_folder, filename)
 
+            clean_data, _ = librosa.load(clean_file, sr=sample_rate)
+            noisy_data, _ = librosa.load(noisy_file, sr=sample_rate)
+
             # align clean and noisy files if necessary
             if os.getenv("FILES_NOT_ALIGNED") == "True":
-                clean_file, noisy_file = align_signals(clean_file, noisy_file)
+                clean_data, noisy_data = align_signals(clean_data, noisy_data)
 
             # slice both clean signal and noisy signal
-            clean_sliced = slice_signal(clean_file, window_size, stride, sample_rate)
-            noisy_sliced = slice_signal(noisy_file, window_size, stride, sample_rate)
+            clean_sliced = slice_signal(clean_data, window_size, stride, sample_rate)
+            noisy_sliced = slice_signal(noisy_data, window_size, stride, sample_rate)
             # serialize - file format goes [original_file]_[slice_number].npy
             # ex) p293_154.wav_5.npy denotes 5th slice of p293_154.wav file
             for idx, slice_tuple in enumerate(zip(clean_sliced, noisy_sliced)):
