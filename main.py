@@ -8,6 +8,7 @@ from torch import optim
 from torch.autograd import Variable
 from torch.utils.data import DataLoader
 from tqdm import tqdm
+import wandb
 
 from data_preprocess import sample_rate
 from model import Generator, Discriminator
@@ -21,6 +22,16 @@ if __name__ == '__main__':
     opt = parser.parse_args()
     BATCH_SIZE = opt.batch_size
     NUM_EPOCHS = opt.num_epochs
+
+    wandb.init(
+            # set the wandb project where this run will be logged
+            project="SEGAN-leftthomas",
+            # track hyperparameters and run metadata
+            config={
+                'batch_size': BATCH_SIZE,
+                'num_epochs': NUM_EPOCHS,
+            },
+        )
 
     # load data
     print('loading data...')
@@ -47,7 +58,7 @@ if __name__ == '__main__':
 
     for epoch in range(NUM_EPOCHS):
         train_bar = tqdm(train_data_loader)
-        for train_batch, train_clean, train_noisy in train_bar:
+        for i, (train_batch, train_clean, train_noisy) in enumerate(train_bar):
 
             # latent vector - normal distribution
             z = nn.init.normal_(torch.Tensor(train_batch.size(0), 1024, 8))
@@ -92,6 +103,16 @@ if __name__ == '__main__':
             train_bar.set_description(
                 'Epoch {}: d_clean_loss {:.4f}, d_noisy_loss {:.4f}, g_loss {:.4f}, g_conditional_loss {:.4f}'
                     .format(epoch + 1, clean_loss.data, noisy_loss.data, g_loss.data, g_cond_loss.data))
+            
+            if i % 100 == 0:
+                wandb.log({
+                    "epoch": epoch,
+                    "iteration": i,
+                    "d_clean_loss": clean_loss.data,
+                    "d_noisy_loss": noisy_loss.data,
+                    "g_loss": g_loss.data,
+                    "g_conditional_loss": g_cond_loss.data,
+                })
 
         # TEST model
         test_bar = tqdm(test_data_loader, desc='Test model and save generated audios')
