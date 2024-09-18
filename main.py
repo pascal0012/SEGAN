@@ -110,6 +110,7 @@ if __name__ == '__main__':
                     "iteration": i,
                     "d_clean_loss": clean_loss.data,
                     "d_noisy_loss": noisy_loss.data,
+                    "d_loss": clean_loss.data + noisy_loss.data,
                     "g_loss": g_loss.data,
                     "g_conditional_loss": g_cond_loss.data,
                 })
