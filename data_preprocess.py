@@ -17,6 +17,9 @@ serialized_test_folder = os.path.join(data_path, os.getenv("SERIALIZED_TEST_FOLD
 window_size = 2**14  # about 1 second of samples
 sample_rate = 16000
 
+if os.getenv("FILES_NOT_ALIGNED") == "True":
+    print("Files are not aligned. Aligning signals.")
+
 
 def slice_signal(file, window_size, stride, sample_rate):
     """
