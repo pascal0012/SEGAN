@@ -59,6 +59,11 @@ def process_and_serialize(data_type):
         ):
             clean_file = os.path.join(clean_folder, filename)
             noisy_file = os.path.join(noisy_folder, filename)
+
+            # align clean and noisy files if necessary
+            if os.getenv("FILES_NOT_ALIGNED") == "True":
+                clean_file, noisy_file = align_signals(clean_file, noisy_file)
+
             # slice both clean signal and noisy signal
             clean_sliced = slice_signal(clean_file, window_size, stride, sample_rate)
             noisy_sliced = slice_signal(noisy_file, window_size, stride, sample_rate)
@@ -94,6 +99,21 @@ def data_verify(data_type):
                 )
                 break
 
+def get_lag(clean_signal: np.ndarray, recorded_signal: np.ndarray):
+    cross_correlation = np.correlate(clean_signal, recorded_signal, mode='full')
+
+    return np.argmax(cross_correlation) - clean_signal.shape[0]
+
+
+def align_signals(clean_signal: np.ndarray, recorded_signal: np.ndarray):
+    lag = get_lag(clean_signal, recorded_signal)
+    assert lag <= 0, "Recorded signal is ahead of clean signal"
+
+    # Pad clean signal in the beginning and cut the end to align them
+    clean_signal = np.pad(clean_signal, (-lag, 0))
+    clean_signal = clean_signal[:recorded_signal.shape[0]]
+
+    return clean_signal, recorded_signal
 
 if __name__ == "__main__":
     process_and_serialize("train")
