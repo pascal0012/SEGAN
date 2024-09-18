@@ -54,17 +54,12 @@ def process_and_serialize(data_type):
         os.makedirs(serialized_folder)
 
     # walk through the path, slice the audio file, and save the serialized result
-    for root, dirs, files in os.walk(clean_folder):
-        if len(files) == 0:
-            continue
-        for filename in tqdm(
-            files, desc="Serialize and down-sample {} audios".format(data_type)
-        ):
-            clean_file = os.path.join(clean_folder, filename)
-            noisy_file = os.path.join(noisy_folder, filename)
+    for clean_file, noisy_file in zip(os.listdir(clean_folder), os.listdir(noisy_folder)):
+            clean_path = os.path.join(clean_folder, clean_file)
+            noisy_path = os.path.join(noisy_folder, noisy_file)
 
-            clean_data, _ = librosa.load(clean_file, sr=sample_rate)
-            noisy_data, _ = librosa.load(noisy_file, sr=sample_rate)
+            clean_data, _ = librosa.load(clean_path, sr=sample_rate)
+            noisy_data, _ = librosa.load(noisy_path, sr=sample_rate)
 
             # align clean and noisy files if necessary
             if os.getenv("FILES_NOT_ALIGNED") == "True":
@@ -78,7 +73,7 @@ def process_and_serialize(data_type):
             for idx, slice_tuple in enumerate(zip(clean_sliced, noisy_sliced)):
                 pair = np.array([slice_tuple[0], slice_tuple[1]])
                 np.save(
-                    os.path.join(serialized_folder, "{}_{}".format(filename, idx)),
+                    os.path.join(serialized_folder, "{}_{}".format(noisy_file, idx)),
                     arr=pair,
                 )
 
