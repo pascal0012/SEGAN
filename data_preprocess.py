@@ -54,7 +54,7 @@ def process_and_serialize(data_type):
         os.makedirs(serialized_folder)
 
     # walk through the path, slice the audio file, and save the serialized result
-    for clean_file, noisy_file in zip(os.listdir(clean_folder), os.listdir(noisy_folder)):
+    for clean_file, noisy_file in zip(os.listdir(clean_folder).sort(), os.listdir(noisy_folder).sort()):
             clean_path = os.path.join(clean_folder, clean_file)
             noisy_path = os.path.join(noisy_folder, noisy_file)
 
