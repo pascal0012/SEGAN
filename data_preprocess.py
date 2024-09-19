@@ -69,6 +69,7 @@ def process_and_serialize(data_type):
             # align clean and noisy files if necessary
             if os.getenv("FILES_NOT_ALIGNED") == "True":
                 clean_data, noisy_data = align_signals(clean_data, noisy_data)
+                print(f"Aligned files {clean_file} and {noisy_file}")
 
             # slice both clean signal and noisy signal
             clean_sliced = slice_signal(clean_data, window_size, stride, sample_rate)
