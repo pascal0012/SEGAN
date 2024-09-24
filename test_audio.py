@@ -22,7 +22,7 @@ if __name__ == '__main__':
     EPOCH_NAME = opt.epoch_name
 
     generator = Generator()
-    generator.load_state_dict(torch.load('epochs/' + EPOCH_NAME, map_location='cpu'))
+    generator.load_state_dict(torch.load('epochs/' + EPOCH_NAME, map_location='cpu', weights_only=True))
     if torch.cuda.is_available():
         generator.cuda()
 
